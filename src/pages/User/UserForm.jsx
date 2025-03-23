@@ -1,12 +1,35 @@
 import React from "react";
 import Navbar from "../../components/Navbar";
+import { useNavigate } from "react-router-dom";
+import { ROUTERS } from "../../helpers/routes";
+import { storeLocal, USER_DATA } from "../../helpers/utils";
+import useApi from "../../api-call/use-api";
+import { toast } from "sonner";
 
 const UserForm = () => {
-  const handleSubmit = (event) => {
+  const { callApi, loading, error } = useApi("user/add-user", "POST");
+
+  const naviagte = useNavigate();
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
     console.log("Form Data Submitted:", data);
+    const formattedData = {
+      name: data.name,
+      email: data.email,
+      phoneNumber: data.phone,
+    };
+
+    const response = await callApi(formattedData);
+    if (response) {
+      toast.success("Success", {
+        description: "Logged In Successfully",
+      });
+      console.log(response, "respo");
+      storeLocal(data, USER_DATA);
+      naviagte(ROUTERS.USER.CHAT);
+    }
   };
 
   return (
